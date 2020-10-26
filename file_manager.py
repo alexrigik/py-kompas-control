@@ -24,6 +24,7 @@ def get_kompas_api5():
                                   0).constants  # import Kompas 3D constants
     return module, api, const
 
+
 module7, api7, const7 = get_kompas_api7()
 module5, api5, const5 = get_kompas_api5()
 
@@ -82,12 +83,44 @@ def create_sketch(doc, const, set_plane):
 def edit_sketch(sketch, sketch_definition, operations):
     sketch2D = sketch_definition.BeginEdit() ##
     for step in operations:
-        if list(step.keys())[0] == "Circle":
+        if list(step.keys())[0] == "ArcByPoint":
+            xc = step["ArcByPoint"]["xc"]
+            yc = step["ArcByPoint"]["yc"]
+            rad = step["ArcByPoint"]["rad"]
+            x1 = step["ArcByPoint"]["x1"]
+            y1 = step["ArcByPoint"]["y1"]
+            x2 = step["ArcByPoint"]["x2"]
+            y2 = step["ArcByPoint"]["y2"]
+            direction = step["ArcByPoint"]["direction"]
+            style = step["ArcByPoint"]["style"]
+            sketch2D.ksArcByPoint(xc, yc, rad, x1, y1, x2, y2, direction, style)
+        elif list(step.keys())[0] == "Circle":
             x = step["Circle"]["x"]
             y = step["Circle"]["y"]
             rad = step["Circle"]["rad"]
             style = step["Circle"]["style"]
             sketch2D.ksCircle(x, y, rad, style)
+        # elif list(step.keys())[0] == "Rectangle":
+        #     xc = step["Rectangle"]["xc"]
+        #     yc = step["Rectangle"]["yc"]
+        #     rad = step["Rectangle"]["rad"]
+        #     x1 = step["Rectangle"]["x1"]
+        #     y1 = step["Rectangle"]["y1"]
+        #     x2 = step["Rectangle"]["x2"]
+        #     y2 = step["Rectangle"]["y2"]
+        #     style = step["Rectangle"]["style"]
+        #
+        #     definition = obj.GetParamStruct()
+        #     ExtrusionParam = definition.ExtrusionParam()
+        #     centre = step["Rectangle"]["centre"]
+        #     sketch2D.ksRectangle(xc, yc, rad, x1, y1, x2, y2, centre, style)
+        elif list(step.keys())[0] == "LineSeg":
+            x1 = step["LineSeg"]["x1"]
+            y1 = step["LineSeg"]["y1"]
+            x2 = step["LineSeg"]["x2"]
+            y2 = step["LineSeg"]["y2"]
+            style = step["LineSeg"]["style"]
+            sketch2D.ksLineSeg(x1, y1, x2, y2, style)
     #sketch2D.ksCircle(0.0,0.0,50.0,1)
     #sketch2D.ksCircle(0.0,0.0,100.0,1)
     sketch_definition.EndEdit() ##
@@ -144,10 +177,14 @@ def save_as_and_quite(doc, api, file_location):
 doc3D = create_file(api5, False, True)  # create detail
 Sketch, sketch_definition = create_sketch(doc3D, const5, "Plane_XOY")  # create sketch on XOY plane
 operations = [{"Circle": {"x": 0.0, "y":  0.0, "rad":  50.0, "style":  1}},  # list of 2D operations
-              {"Circle": {"x": 0.0, "y":  0.0, "rad":  100.0, "style":  1}}]
+              {"Circle": {"x": 0.0, "y":  0.0, "rad":  100.0, "style":  1}},
+              {"ArcByPoint": {"xc": 150.0, "yc": 150.0, "rad": 20 ,
+                              "x1": 130.0, "y1": 150.0, "x2": 150.0, "y2": 170.0, "direction": -1, "style": 1}},
+              {"LineSeg": {"x1": 130.0, "y1": 150.0, "x2": 150.0, "y2": 170.0, "style": 1}}]
 edit_sketch(Sketch, sketch_definition, operations)  # drawing circle by operations from operations list
 extrusion(doc3D, const5, Sketch, "Extrusion operation 1")  # extrude of washer's body
 save_as_and_quite(doc3D, app7, "D:\/washer.m3d")  # save detail to the file with name washer.m3d
+
 
 
 
