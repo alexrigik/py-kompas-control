@@ -3,6 +3,7 @@ import os
 import re
 import pythoncom
 import subprocess
+import yaml
 from win32com.client import Dispatch, gencache
 
 
@@ -31,7 +32,7 @@ module5, api5, const5 = get_kompas_api5()
 app7 = api7.Application  # managing Kompas app
 
 ### some feature to test app7 functionality ###
-# app7.Visible = True  # show Kompas window
+app7.Visible = True  # show Kompas window
 # app7.HideMessage = const7.ksHideMessageNo  # close all Kompas notification
 # print(app7.ApplicationName(FullName=True))  # print Kompas program name
 
@@ -174,19 +175,56 @@ def save_as_and_quite(doc, api, file_location):
 
 
 # creation of washer
-doc3D = create_file(api5, False, True)  # create detail
-Sketch, sketch_definition = create_sketch(doc3D, const5, "Plane_XOY")  # create sketch on XOY plane
-operations = [{"Circle": {"x": 0.0, "y":  0.0, "rad":  50.0, "style":  1}},  # list of 2D operations
-              {"Circle": {"x": 0.0, "y":  0.0, "rad":  100.0, "style":  1}},
-              {"ArcByPoint": {"xc": 150.0, "yc": 150.0, "rad": 20 ,
-                              "x1": 130.0, "y1": 150.0, "x2": 150.0, "y2": 170.0, "direction": -1, "style": 1}},
-              {"LineSeg": {"x1": 130.0, "y1": 150.0, "x2": 150.0, "y2": 170.0, "style": 1}}]
-edit_sketch(Sketch, sketch_definition, operations)  # drawing circle by operations from operations list
-extrusion(doc3D, const5, Sketch, "Extrusion operation 1")  # extrude of washer's body
-save_as_and_quite(doc3D, app7, "D:\/washer.m3d")  # save detail to the file with name washer.m3d
+# doc3D = create_file(api5, False, True)  # create detail
+# Sketch, sketch_definition = create_sketch(doc3D, const5, "Plane_XOY")  # create sketch on XOY plane
+# operations = [{"Circle": {"x": 0.0, "y":  0.0, "rad":  50.0, "style":  1}},  # list of 2D operations
+#               {"Circle": {"x": 0.0, "y":  0.0, "rad":  100.0, "style":  1}},
+#               {"ArcByPoint": {"xc": 150.0, "yc": 150.0, "rad": 20 ,
+#                               "x1": 130.0, "y1": 150.0, "x2": 150.0, "y2": 170.0, "direction": -1, "style": 1}},
+#               {"LineSeg": {"x1": 130.0, "y1": 150.0, "x2": 150.0, "y2": 170.0, "style": 1}}]
+# edit_sketch(Sketch, sketch_definition, operations)  # drawing circle by operations from operations list
+# extrusion(doc3D, const5, Sketch, "Extrusion operation 1")  # extrude of washer's body
+# save_as_and_quite(doc3D, app7, "D:\/washer.m3d")  # save detail to the file with name washer.m3d
 
 
+#print(parsed_config_file)
 
+def interpreter(parsed_config_file, const5):
+    global doc3D
+    global plane
+    global operations
+    global Sketch
+    global sketch_definition
+    for i in parsed_config_file["command"]:
+        if list(i.keys())[0] == "create":
+            if i["create"] == "detail":
+                doc3D = create_file(api5, False, True)  # create detail
+            elif i["create"] == "assembly":
+                doc3D = create_file(api5, True, False)  # create assembly
+            elif i["create"] == "sketch":
+                Sketch, sketch_definition = create_sketch(doc3D, const5, plane)  # create sketch on XOY plane
+            elif list(i["create"].keys())[0] == "extrusion":
+                extrusion(doc3D, const5, Sketch,
+                          i["create"]["extrusion"]["name"])  # extrude of washer's body
+        if list(i.keys())[0] == "edit":
+            if i["edit"] == "sketch":
+                edit_sketch(Sketch, sketch_definition, operations)  # drawing circle by operations from operations list
+        if list(i.keys())[0] == "set_plane":
+            if i["set_plane"] == "XOY":
+                plane = "Plane_XOY"
+        if list(i.keys())[0] == "saveAs_quit":
+            save_as_and_quite(doc3D, app7,
+                              i["saveAs_quit"]["path"] +
+                              i["saveAs_quit"]["name"])  # save detail to the file with name washer.m3d
+        if list(i.keys())[0] == "draw":
+            operations = []
+            for j in i["draw"]:
+                operations.append(j)
+
+
+yaml_file = open("config.yaml")  # loading configuration file
+parsed_config_file = yaml.load(yaml_file, Loader=yaml.FullLoader)  # parsing it
+interpreter(parsed_config_file, const5)  ## run interpretor
 
 # some drafts
 #doc3D.fileName = "D:\/test.m3d"

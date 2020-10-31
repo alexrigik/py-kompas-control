@@ -1,0 +1,23 @@
+# Example
+command:
+  - create: detail
+  - set_plane: XOY
+  - create: sketch
+  - draw:
+      - Circle:
+          x: 0.0
+          y: 0.0
+          rad: 50.0
+          style: 1
+      - Circle:
+          x: 0.0
+          y: 0.0
+          rad: 100.0
+          style: 1
+  - edit: sketch
+  - create:
+      extrusion:
+        name: "Extrusion operation 1"
+  - saveAs_quit:
+      name: "washer.m3d"
+      path: "D:\/"
