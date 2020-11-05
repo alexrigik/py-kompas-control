@@ -2,4 +2,9 @@
 main.py
 #tool's dir
 .idea
-
+#django files
+kompas_control_panel/*.DS_Store
+kompas_control_panel/*.pyc
+kompas_control_panel/control_panel/__pycache__
+kompas_control_panel/kompas_control_panel/__pycache__
+kompas_control_panel/kompas_control_panel/secrets.py
