@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>KOMPAS control</title>
+{% endblock %}
+
+{% block content %}
+<div class="main_form">
+    <h2>KOMPAS control</h2>
+    <form enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit">Submit</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block footer%}
+<div class="footer">
+    <small>2020</small>
+</div>
+{% endblock %}
